@@ -1,0 +1,2 @@
+cd /opt/gyds-chain
+go mod tidy
