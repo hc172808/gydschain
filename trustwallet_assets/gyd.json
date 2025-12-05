@@ -1,0 +1,11 @@
+{
+  "name": "GYD Coin",
+  "symbol": "GYD",
+  "decimals": 8,
+  "description": "Secondary coin of GYDS blockchain",
+  "website": "https://your-website.com",
+  "socials": {
+    "twitter": "https://twitter.com/yourhandle"
+  },
+  "logoURI": "https://raw.githubusercontent.com/yourusername/your-trustwallet-assets-repo/main/gyd.png"
+}
