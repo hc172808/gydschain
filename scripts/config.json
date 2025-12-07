@@ -1,0 +1,9 @@
+{
+  "ADMIN_WALLET": "your_admin_wallet_address_here",
+  "RPC_PORT": 8545,
+  "BLOCK_TIME": 10,
+  "ENABLE_MINING": true,
+  "MAINNET": false,
+  "TRUSTED_RPC_IP": "127.0.0.1",
+  "VPN_SUBNET": "10.8.0.0/24"
+}
