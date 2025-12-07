@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// Load config
-	config, err := core.LoadConfig("./scripts/config.json")
+	config, err := core.LoadConfig("/opt/gyds-chain/scripts/config.json")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
@@ -49,3 +49,4 @@ func main() {
 
 	select {} // keep main running
 }
+
