@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	"gyds-chain/core"
+	"gyds-chain/p2p"
+	"gyds-chain/rpc"
 )
 
 func main() {
@@ -19,7 +22,17 @@ func main() {
 	blockchain := core.NewBlockchain([]*core.Block{genesis}, config.BlockTime)
 	log.Println("✅ Blockchain initialized with genesis block")
 
-	// Simple CPU mining loop
+	// Start P2P node
+	node := p2p.NewNode("0.0.0.0", 30303)
+	go node.StartServer()
+	log.Println("🌐 P2P node started")
+
+	// Start RPC server
+	rpcServer := rpc.NewRPCServer(blockchain, config.TrustedRPCIP)
+	go rpcServer.Start(config.RPCPort)
+	log.Println("🖥 RPC server started")
+
+	// CPU mining loop
 	if config.EnableMining {
 		log.Println("⛏ Mining enabled")
 		for {
@@ -27,11 +40,12 @@ func main() {
 			block := blockchain.MinePendingTransactions(config.AdminWallet)
 			if block != nil {
 				log.Printf("🎉 New block mined: %d", block.Index)
+				node.Broadcast(fmt.Sprintf("New block %d mined", block.Index))
 			}
 		}
 	} else {
 		log.Println("⚡ Mining disabled")
 	}
 
-	select {} // keep running
+	select {} // keep main running
 }
