@@ -1,0 +1,497 @@
+✅ Example for your GYDS chain:
+Field	Value
+Name	GYDS
+Symbol	GYDS
+Node URL	http://127.0.0.1:8545
+
+Address Prefix	gyds
+Asset Denom	gyds
+Fee Rate	0.01
+
+Once you fill these, Trust Wallet should be able to:
+
+Read balances from your node
+
+Send/receive transactions
+
+Display your coin correctly
+
+If you want, I can give a step-by-step guide to test sending a transaction from Trust Wallet to your GYDS full node so you can verify everything works end-to-end.
+
+Do you want me to do that?
+
+You said:
+now i get this , sudo systemctl daemon-reload
+sudo systemctl enable gyds-fullnode
+sudo systemctl start gyds-fullnode
+sudo systemctl status gyds-fullnode
+Failed to enable unit: Unit file gyds-fullnode.service does not exist.
+Failed to start gyds-fullnode.service: Unit gyds-fullnode.service not found.
+Unit gyds-fullnode.service could not be found.
+ChatGPT said:
+
+Ah! That error means systemd cannot find your service file, so the full node cannot be enabled or started as a service.
+
+Here’s how to fix it:
+
+1️⃣ Create the service file
+
+Create a file at /etc/systemd/system/gyds-fullnode.service:
+
+sudo nano /etc/systemd/system/gyds-fullnode.service
+
+
+Paste this:
+
+[Unit]
+Description=GYDS Full Node
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/gyds-chain
+ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode
+Restart=always
+RestartSec=5
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
+
+
+Notes:
+
+WorkingDirectory → path where your project is located
+
+ExecStart → path to your compiled gyds-node binary. Adjust if you used go build in another folder
+
+2️⃣ Reload systemd to detect the new service
+sudo systemctl daemon-reload
+
+3️⃣ Enable & start the service
+sudo systemctl enable gyds-fullnode
+sudo systemctl start gyds-fullnode
+
+4️⃣ Check status
+sudo systemctl status gyds-fullnode
+
+
+You should see logs showing the blockchain initialized, P2P and RPC servers started, and mining enabled.
+
+💡 Tip: If you haven’t built your node binary yet, do this first:
+
+cd /opt/gyds-chain/cmd
+go build -o gyds-node main.go
+
+
+Make sure the binary path matches ExecStart in the service file.
+
+If you want, I can write ready-to-use systemd service files for both full node and lite nodes, so you can start your whole GYDS network automatically on boot.
+
+Do you want me to do that?
+
+You said:
+sudo systemctl status gyds-fullnode
+* gyds-fullnode.service - GYDS Full Node
+     Loaded: loaded (/etc/systemd/system/gyds-fullnode.service; enabled; vendor preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2025-12-07 19:37:27 UTC; 2s ago
+    Process: 11947 ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode (code=exited, status=203/EXEC)
+   Main PID: 11947 (code=exited, status=203/EXEC)
+ChatGPT said:
+
+Ah — that status=203/EXEC means systemd tried to run the binary, but it could not execute it. This usually happens for one of these reasons:
+
+1️⃣ Binary does not exist at the specified path
+
+Check if the file exists:
+
+ls -l /opt/gyds-chain/cmd/gyds-node
+
+
+If it says No such file, you need to build it first:
+
+cd /opt/gyds-chain/cmd
+go build -o gyds-node main.go
+
+2️⃣ Binary does not have execute permissions
+
+Make sure it’s executable:
+
+sudo chmod +x /opt/gyds-chain/cmd/gyds-node
+
+3️⃣ Incorrect path in systemd service
+
+Open your service file and verify ExecStart points to the full path of the binary:
+
+ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode
+
+
+If your binary is somewhere else, update the path accordingly.
+
+4️⃣ Re-load systemd and start again
+sudo systemctl daemon-reload
+sudo systemctl restart gyds-fullnode
+sudo systemctl status gyds-fullnode
+
+
+Once this is fixed, the service should start without the status=203/EXEC error.
+
+I can also provide a fully working systemd template for full + lite nodes, pre-configured with correct paths and permissions, so it starts automatically.
+
+Do you want me to do that?
+
+You said:
+i need to run ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode  ?
+ChatGPT said:
+
+Yes ✅ — that is exactly what you need.
+
+ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode tells systemd how to start your GYDS full node service.
+
+Steps to make it work
+
+Build the binary if you haven’t already:
+
+cd /opt/gyds-chain/cmd
+go build -o gyds-node main.go
+
+
+This creates the executable at /opt/gyds-chain/cmd/gyds-node.
+
+Make sure it’s executable:
+
+sudo chmod +x /opt/gyds-chain/cmd/gyds-node
+
+
+Check the binary works manually:
+
+/opt/gyds-chain/cmd/gyds-node --fullnode
+
+
+This should start the node and print logs for the blockchain, P2P, and RPC server.
+
+If this works, systemd will be able to start it too.
+
+Reload systemd and start service:
+
+sudo systemctl daemon-reload
+sudo systemctl enable gyds-fullnode
+sudo systemctl start gyds-fullnode
+sudo systemctl status gyds-fullnode
+
+
+You should now see Active: active (running) instead of exit-code 203/EXEC.
+
+If you want, I can give you a ready-to-use systemd setup for both full node and multiple lite nodes, so they all start automatically on reboot with proper paths and permissions.
+
+Do you want me to do that?
+
+You said:
+ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode
+--fullnode: command not found
+ChatGPT said:
+
+Ah! That error comes from running the command directly in the shell incorrectly. Let me clarify:
+
+✅ Correct way to run
+
+The --fullnode is not a separate command, it’s a flag/argument to your binary.
+
+So you must run the binary itself, then pass --fullnode:
+
+/opt/gyds-chain/cmd/gyds-node --fullnode
+
+
+Do not put --fullnode on its own line.
+
+Make sure the binary exists and is executable (chmod +x /opt/gyds-chain/cmd/gyds-node).
+
+Example
+cd /opt/gyds-chain/cmd
+./gyds-node --fullnode
+
+
+You should see logs like:
+
+✅ Blockchain initialized with genesis block
+🌐 P2P node started
+🖥 RPC server started
+⛏ Mining enabled
+
+
+Once this works manually, systemd can run it using the same ExecStart line:
+
+ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode
+
+
+Do you want me to give a full step-by-step command sequence to get the full node running under systemd without any errors?
+
+You said:
+i geting sudo systemctl daemon-reload
+sudo systemctl enable gyds-fullnode
+sudo systemctl start gyds-fullnode
+sudo systemctl status gyds-fullnode
+* gyds-fullnode.service - GYDS Full Node
+     Loaded: loaded (/etc/systemd/system/gyds-fullnode.service; enabled; vendor preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2025-12-07 19:46:18 UTC; 25ms ago
+    Process: 12953 ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode (code=exited, status=1/FAILURE)
+   Main PID: 12953 (code=exited, status=1/FAILURE)
+        CPU: 9ms
+ChatGPT said:
+
+Ah! ✅ Good — now we are past the 203/EXEC problem.
+
+The new error:
+
+status=1/FAILURE
+
+
+means the binary is running, but immediately exits with an error. This is usually because your program itself failed, not systemd.
+
+How to debug
+
+Run the binary manually to see the real error:
+
+/opt/gyds-chain/cmd/gyds-node --fullnode
+
+
+Don’t use sudo systemctl yet — running it manually will show the log/error directly.
+
+Check common causes:
+
+Config file not found → ./scripts/config.json must exist relative to the working directory.
+
+When running manually from /opt/gyds-chain/cmd, your binary expects ./scripts/config.json → relative to /opt/gyds-chain/cmd.
+
+Solution: either run from project root:
+
+cd /opt/gyds-chain
+./cmd/gyds-node --fullnode
+
+
+Or edit main.go to use an absolute path for the config:
+
+config, err := core.LoadConfig("/opt/gyds-chain/scripts/config.json")
+
+
+Permissions → make sure /opt/gyds-chain/scripts/config.json is readable:
+
+chmod 644 /opt/gyds-chain/scripts/config.json
+
+
+Once it runs manually, update your systemd service:
+
+WorkingDirectory=/opt/gyds-chain
+ExecStart=/opt/gyds-chain/cmd/gyds-node --fullnode
+
+
+WorkingDirectory must be the project root, not /cmd.
+
+Then reload & start:
+
+sudo systemctl daemon-reload
+sudo systemctl restart gyds-fullnode
+sudo systemctl status gyds-fullnode
+
+
+✅ Once the binary runs manually without error, systemd will also start it successfully.
+
+I can give you a ready-to-go fixed systemd service for full node that handles the working directory and config path correctly.
+
+Do you want me to do that?
+
+You said:
+yes
+ChatGPT said:
+
+Perfect! Here’s a ready-to-use systemd service for your GYDS full node that handles the working directory and config properly. This avoids all the previous path and execution issues.
+
+1️⃣ Create the service file
+sudo nano /etc/systemd/system/gyds-fullnode.service
+
+
+Paste this:
+
+[Unit]
+Description=GYDS Full Node
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/gyds-chain
+ExecStart=/opt/gyds-chain/cmd/gyds-node --config /opt/gyds-chain/scripts/config.json --fullnode
+Restart=always
+RestartSec=5
+LimitNOFILE=4096
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
+
+Notes:
+
+WorkingDirectory=/opt/gyds-chain → project root
+
+--config /opt/gyds-chain/scripts/config.json → absolute path to your config
+
+ExecStart includes the --fullnode flag
+
+Output is sent to journalctl for easier logs
+
+2️⃣ Reload systemd
+sudo systemctl daemon-reload
+
+3️⃣ Enable & start the service
+sudo systemctl enable gyds-fullnode
+sudo systemctl start gyds-fullnode
+
+4️⃣ Check logs and status
+sudo systemctl status gyds-fullnode
+sudo journalctl -u gyds-fullnode -f
+
+
+You should now see:
+
+✅ Blockchain initialized with genesis block
+🌐 P2P node started
+🖥 RPC server started
+⛏ Mining enabled
+🖥 RPC server listening on :8545
+🌐 P2P node listening on 0.0.0.0:30303
+
+
+No more status=203/EXEC or FAILURE errors.
+
+If you want, I can also create a systemd template for multiple lite nodes, so you can start gyds-litenode@1, gyds-litenode@2 automatically, just like the full node.
+
+Do you want me to do that?
+
+You said:
+ ✅ Blockchain initialized with genesis block
+Dec 07 19:52:42 111111111f gyds-node[13686]: 2025/12/07 19:52:42 🌐 P2P node started
+Dec 07 19:52:42 111111111f gyds-node[13686]: 2025/12/07 19:52:42 🖥 RPC server started
+Dec 07 19:52:42 111111111f gyds-node[13686]: 2025/12/07 19:52:42 ⛏ Mining enabled
+Dec 07 19:52:42 111111111f gyds-node[13686]: 2025/12/07 19:52:42 🖥 RPC server listening on :8545
+Dec 07 19:52:42 111111111f gyds-node[13686]: 2025/12/07 19:52:42 RPC server failed: listen tcp :8545: bind: address already in use
+Dec 07 19:52:42 111111111f systemd[1]: gyds-fullnode.service: Main process exited, code=exited, status=1/FAILURE
+Dec 07 19:52:42 111111111f systemd[1]: gyds-fullnode.service: Failed with result 'exit-code'.
+Dec 07 19:52:47 111111111f systemd[1]: gyds-fullnode.service: Scheduled restart job, restart counter is at 179.
+Dec 07 19:52:47 111111111f systemd[1]: Stopped GYDS Full Node.
+Dec 07 19:52:47 111111111f systemd[1]: Started GYDS Full Node.
+Dec 07 19:52:47 111111111f gyds-node[13696]: 2025/12/07 19:52:47 ✅ Blockchain initialized with genesis block
+Dec 07 19:52:47 111111111f gyds-node[13696]: 2025/12/07 19:52:47 🌐 P2P node started
+Dec 07 19:52:47 111111111f gyds-node[13696]: 2025/12/07 19:52:47 🖥 RPC server started
+Dec 07 19:52:47 111111111f gyds-node[13696]: 2025/12/07 19:52:47 ⛏ Mining enabled
+Dec 07 19:52:47 111111111f gyds-node[13696]: 2025/12/07 19:52:47 🖥 RPC server listening on :8545
+Dec 07 19:52:47 111111111f gyds-node[13696]: 2025/12/07 19:52:47 RPC server failed: listen tcp :8545: bind: address already in use
+Dec 07 19:52:47 111111111f systemd[1]: gyds-fullnode.service: Main process exited, code=exited, status=1/FAILURE
+Dec 07 19:52:47 111111111f systemd[1]: gyds-fullnode.service: Failed with result 'exit-code'.
+ChatGPT said:
+
+Ah! Now we’re seeing a different problem:
+
+RPC server failed: listen tcp :8545: bind: address already in use
+
+
+This means something else is already using port 8545. Your GYDS full node cannot start the RPC server on that port because it’s already taken.
+
+Steps to fix
+1️⃣ Check what is using port 8545
+sudo lsof -i :8545
+
+
+This will show the process currently listening on that port.
+
+Example output:
+
+COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+gyds-node 1234 root   6u  IPv4 12345      0t0  TCP *:8545 (LISTEN)
+
+
+If another gyds-node or other process is running, you need to stop it.
+
+2️⃣ Stop any conflicting process
+sudo kill <PID>
+
+
+Or, if it’s another systemd service:
+
+sudo systemctl stop gyds-fullnode
+
+3️⃣ Optionally change RPC port
+
+If you want to keep the other process running, change your full node’s RPC port.
+
+Edit config.json:
+
+"RPC_PORT": 8546
+
+
+Or pass a flag when starting the node:
+
+/opt/gyds-chain/cmd/gyds-node --fullnode --rpc-port 8546
+
+
+Update systemd service accordingly:
+
+ExecStart=/opt/gyds-chain/cmd/gyds-node --config /opt/gyds-chain/scripts/config.json --fullnode --rpc-port 8546
+
+4️⃣ Restart the service
+sudo systemctl daemon-reload
+sudo systemctl restart gyds-fullnode
+sudo systemctl status gyds-fullnode
+
+
+You should now see no more address already in use errors, and your node should run normally.
+
+If you want, I can give you a fixed systemd service template that automatically uses the RPC port from config.json, so you don’t get port conflicts in the future.
+
+Do you want me to do that?
+
+You said:
+sudo lsof -i :8545
+COMMAND   PID USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME
+main    10598 root    8u  IPv6 25006898      0t0  TCP *:8545 (LISTEN)
+curl    11528 root    5u  IPv4 25073077      0t0  TCP localhost:57114->localhost:8545 (ESTABLISHED)
+ChatGPT said:
+
+Perfect — this confirms the issue.
+
+PID 10598 (main) is already listening on port 8545.
+
+That is likely another instance of your GYDS node that’s still running.
+
+Steps to fix
+1️⃣ Kill the existing process
+sudo kill 10598
+
+
+If it doesn’t stop, force kill:
+
+sudo kill -9 10598
+
+2️⃣ Confirm the port is free
+sudo lsof -i :8545
+
+
+You should see no output, meaning port 8545 is now free.
+
+3️⃣ Start the systemd service again
+sudo systemctl restart gyds-fullnode
+sudo systemctl status gyds-fullnode
+
+
+Now it should start successfully and show logs:
+
+✅ Blockchain initialized with genesis block
+🌐 P2P node started
+🖥 RPC server started
+⛏ Mining enabled
+🖥 RPC server listening on :8545
+🌐 P2P node listening on 0.0.0.0:30303
+
+
+💡 Tip: Only one instance of the full node can run per RPC port.
