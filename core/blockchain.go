@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"log"
-	"math"
 	"time"
 )
 
@@ -27,7 +26,7 @@ func NewBlockchain(genesisBlocks []*Block, blockTime int) *Blockchain {
 		LiquidityPools: make(map[string]*LiquidityPool),
 		Balances:       make(map[string]float64),
 	}
-	// Initialize balances from genesis block
+
 	for _, tx := range genesisBlocks[0].Transactions {
 		bc.Balances[tx.Recipient] = tx.Amount
 	}
@@ -36,7 +35,6 @@ func NewBlockchain(genesisBlocks []*Block, blockTime int) *Blockchain {
 
 // AddTransaction adds a transaction to pending transactions
 func (bc *Blockchain) AddTransaction(tx Transaction) error {
-	// Simple balance check
 	if bc.Balances[tx.Sender] < tx.Amount+tx.Fee {
 		return fmt.Errorf("insufficient balance")
 	}
@@ -62,7 +60,6 @@ func (bc *Blockchain) MinePendingTransactions(miner string) *Block {
 		Nonce:        0,
 	}
 
-	// CPU Mining: simple Proof-of-Work
 	for {
 		hash := newBlock.CalculateHash()
 		if isValidHash(hash, newBlock.Difficulty) {
@@ -72,21 +69,18 @@ func (bc *Blockchain) MinePendingTransactions(miner string) *Block {
 		newBlock.Nonce++
 	}
 
-	// Update balances
 	for _, tx := range bc.PendingTxs {
 		bc.Balances[tx.Sender] -= tx.Amount + tx.Fee
 		bc.Balances[tx.Recipient] += tx.Amount
-		bc.Balances[miner] += tx.Fee // miner collects fees
+		bc.Balances[miner] += tx.Fee
 	}
 
 	bc.Blocks = append(bc.Blocks, newBlock)
-	bc.PendingTxs = []Transaction{} // clear pending transactions
-
+	bc.PendingTxs = []Transaction{}
 	log.Printf("Block %d mined by %s with %d transactions\n", newBlock.Index, miner, len(newBlock.Transactions))
 	return newBlock
 }
 
-// Simple hash difficulty check
 func isValidHash(hash string, difficulty int) bool {
 	prefix := ""
 	for i := 0; i < difficulty; i++ {
@@ -95,7 +89,6 @@ func isValidHash(hash string, difficulty int) bool {
 	return hash[:difficulty] == prefix
 }
 
-// CreateLiquidityPool adds a new pool to the blockchain
 func (bc *Blockchain) CreateLiquidityPool(tokenA, tokenB string, feePercent float64) *LiquidityPool {
 	key := tokenA + "_" + tokenB
 	pool := NewLiquidityPool(tokenA, tokenB, feePercent)
@@ -103,7 +96,6 @@ func (bc *Blockchain) CreateLiquidityPool(tokenA, tokenB string, feePercent floa
 	return pool
 }
 
-// GetBalance returns the balance of a wallet address
 func (bc *Blockchain) GetBalance(address string) float64 {
 	if val, ok := bc.Balances[address]; ok {
 		return val
@@ -111,12 +103,6 @@ func (bc *Blockchain) GetBalance(address string) float64 {
 	return 0
 }
 
-// GetLatestBlock returns the most recent block
 func (bc *Blockchain) GetLatestBlock() *Block {
 	return bc.Blocks[len(bc.Blocks)-1]
-}
-
-// AdjustDifficulty can be implemented to update mining difficulty dynamically
-func (bc *Blockchain) AdjustDifficulty() {
-	// TODO: implement dynamic difficulty based on block times
 }
