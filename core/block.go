@@ -3,25 +3,31 @@ package core
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"strconv"
 	"time"
 )
 
-// Block represents a single block in the blockchain
 type Block struct {
-	Index        int           `json:"index"`
-	Timestamp    int64         `json:"timestamp"`
-	PreviousHash string        `json:"previous_hash"`
-	Hash         string        `json:"hash"`
-	Transactions []Transaction `json:"transactions"`
-	Miner        string        `json:"miner"`
-	Difficulty   int           `json:"difficulty"`
-	Nonce        int64         `json:"nonce"`
+	Index        int
+	Timestamp    int64
+	PreviousHash string
+	Hash         string
+	Transactions []Transaction
+	Miner        string
+	Difficulty   int
+	Nonce        int64
 }
 
 // CalculateHash computes the SHA256 hash of the block
 func (b *Block) CalculateHash() string {
-	record := string(b.Index) + string(b.Timestamp) + b.PreviousHash + serializeTransactions(b.Transactions) +
-		b.Miner + string(b.Difficulty) + string(b.Nonce)
+	record := strconv.Itoa(b.Index) +
+		strconv.FormatInt(b.Timestamp, 10) +
+		b.PreviousHash +
+		serializeTransactions(b.Transactions) +
+		b.Miner +
+		strconv.Itoa(b.Difficulty) +
+		strconv.FormatInt(b.Nonce, 10)
+
 	hash := sha256.New()
 	hash.Write([]byte(record))
 	return hex.EncodeToString(hash.Sum(nil))
@@ -33,7 +39,7 @@ func CreateGenesisBlock(adminWallet string) *Block {
 		Index:        0,
 		Timestamp:    time.Now().Unix(),
 		PreviousHash: "0",
-		Transactions: []Transaction{}, // Add initial mint transactions if needed
+		Transactions: []Transaction{},
 		Miner:        adminWallet,
 		Difficulty:   1,
 		Nonce:        0,
@@ -46,7 +52,10 @@ func CreateGenesisBlock(adminWallet string) *Block {
 func serializeTransactions(txs []Transaction) string {
 	result := ""
 	for _, tx := range txs {
-		result += tx.Sender + tx.Recipient + string(tx.Amount) + string(tx.Fee) + string(tx.Nonce)
+		amountStr := strconv.FormatFloat(tx.Amount, 'f', 6, 64)
+		feeStr := strconv.FormatFloat(tx.Fee, 'f', 6, 64)
+		nonceStr := strconv.FormatInt(tx.Nonce, 10)
+		result += tx.Sender + tx.Recipient + amountStr + feeStr + nonceStr
 	}
 	return result
 }
