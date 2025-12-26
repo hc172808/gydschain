@@ -1,28 +1,31 @@
 #!/bin/bash
+set -euo pipefail
 
-# Upload TrustWallet Assets Script
-# Usage: bash upload_trustwallet_assets.sh
+# Upload TrustWallet Assets Script (SAFE / READ-ONLY)
+# Usage: bash upload_trustwallet_assets.sh [target-dir]
 
-set -e
-
-ASSETS_DIR="./trustwallet_assets"
-REPO_URL="git clone --depth=1 https://github.com/trustwallet/assets.git /tmp/trustwallet-assets
-
+SOURCE_DIR="$(cd "$(dirname "$0")/../trustwallet_assets" && pwd)"
+TARGET_DIR="${1:-/opt/gyds-node/assets/trustwallet}"
 TMP_DIR="/tmp/trustwallet-assets"
+REPO_URL="https://github.com/trustwallet/assets.git"
 
-echo "Cloning GitHub repository..."
-rm -rf $TMP_DIR
-git clone $REPO_URL $TMP_DIR
+echo "📦 Syncing TrustWallet assets (read-only)..."
 
-echo "Copying assets..."
-cp $ASSETS_DIR/*.png $TMP_DIR/
-cp $ASSETS_DIR/*.json $TMP_DIR/
+# Prevent git from ever prompting
+export GIT_TERMINAL_PROMPT=0
 
-cd $TMP_DIR
+rm -rf "$TMP_DIR"
+git clone --depth=1 "$REPO_URL" "$TMP_DIR"
 
-echo "Adding files to Git..."
-git add .
-git commit -m "Update GYDS/GYD logos and metadata"
-git push origin main
+mkdir -p "$TARGET_DIR"
 
-echo "Assets uploaded successfully!"
+echo "📁 Copying GYDS / GYD assets..."
+
+# Copy ONLY your project assets
+cp -v "$SOURCE_DIR"/*.png "$TARGET_DIR/" 2>/dev/null || true
+cp -v "$SOURCE_DIR"/*.json "$TARGET_DIR/" 2>/dev/null || true
+
+echo "🧹 Cleaning up..."
+rm -rf "$TMP_DIR"
+
+echo "✅ TrustWallet assets synced locally"
