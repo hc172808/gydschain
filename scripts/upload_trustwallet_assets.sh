@@ -6,7 +6,8 @@
 set -e
 
 ASSETS_DIR="./trustwallet_assets"
-REPO_URL="https://github.com/yourusername/your-trustwallet-assets-repo.git"
+REPO_URL="git clone --depth=1 https://github.com/trustwallet/assets.git /tmp/trustwallet-assets
+
 TMP_DIR="/tmp/trustwallet-assets"
 
 echo "Cloning GitHub repository..."
