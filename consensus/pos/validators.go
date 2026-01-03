@@ -1,8 +1,6 @@
 package pos
 
-import "github.com/hc172808/gydschain/core"
-
-func (e *Engine) validator(addr core.Address) *Validator {
+func (e *Engine) validator(addr string) *Validator {
 	for _, v := range e.State.Validators {
 		if v.Address == addr {
 			return v
@@ -11,7 +9,7 @@ func (e *Engine) validator(addr core.Address) *Validator {
 	return nil
 }
 
-func (e *Engine) addOrIncreaseValidator(addr core.Address, amt uint64) {
+func (e *Engine) addOrIncreaseValidator(addr string, amt uint64) {
 	v := e.validator(addr)
 	if v != nil {
 		v.Stake += amt
