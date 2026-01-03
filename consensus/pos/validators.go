@@ -16,7 +16,6 @@ func (e *Engine) addOrIncreaseValidator(addr string, amt uint64) {
 		v.Power = v.Stake
 		return
 	}
-
 	e.State.Validators = append(e.State.Validators, &Validator{
 		Address: addr,
 		Stake:   amt,
