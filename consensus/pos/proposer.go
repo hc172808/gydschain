@@ -1,5 +1,6 @@
 package pos
 
+// Proposer returns the validator for current block (round-robin)
 func (s *State) Proposer() *Validator {
 	if len(s.Validators) == 0 {
 		return nil
