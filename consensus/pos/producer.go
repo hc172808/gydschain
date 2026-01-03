@@ -6,9 +6,10 @@ import (
 	"github.com/hc172808/gydschain/core"
 )
 
+// StartBlockProduction runs a demo PoS block loop
 func (e *Engine) StartBlockProduction() {
 	go func() {
-		ticker := time.NewTicker(5 * time.Second)
+		ticker := time.NewTicker(time.Duration(BlockInterval) * time.Second)
 		for range ticker.C {
 			e.produceBlock()
 		}
