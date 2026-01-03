@@ -7,14 +7,14 @@ type Engine struct {
 	State *State
 }
 
-// NewEngine creates an empty engine
+// NewEngine creates an empty PoS engine
 func NewEngine() *Engine {
 	return &Engine{
 		State: NewState(),
 	}
 }
 
-// NewEngineFromGenesis creates engine with genesis validators
+// NewEngineFromGenesis initializes engine from genesis validators
 func NewEngineFromGenesis(g *core.Genesis) *Engine {
 	state := NewState()
 
@@ -27,4 +27,9 @@ func NewEngineFromGenesis(g *core.Genesis) *Engine {
 	}
 
 	return &Engine{State: state}
+}
+
+// NewState creates empty PoS state
+func NewState() *State {
+	return &State{}
 }
