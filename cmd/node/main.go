@@ -1,17 +1,29 @@
-
 package main
 
 import (
-    "github.com/hc172808/gydschain/consensus/pos"
-    "github.com/hc172808/gydschain/rpc"
-    "github.com/hc172808/gydschain/utils"
+	"log"
+
+	"github.com/hc172808/gydschain/consensus/pos"
+	"github.com/hc172808/gydschain/rpc"
+	"github.com/hc172808/gydschain/utils"
 )
 
 func main() {
-    utils.Info("Starting GYDS node")
+	utils.Info("Starting GYDS node")
 
-    _ = pos.NewEngine()
+	// Initialize PoS engine
+	_ = pos.NewEngine()
 
-    server := rpc.New(":8545")
-    server.Start()
+	// Start RPC server
+	server := rpc.New(":8545")
+	go func() {
+		if err := server.Start(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	utils.Info("Node is running and listening")
+
+	// 🔒 BLOCK FOREVER (node stays alive)
+	select {}
 }
