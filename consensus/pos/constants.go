@@ -1,5 +1,7 @@
- cd ~/gydschain
-go clean -cache
-go build ./cmd/node
-# github.com/hc172808/gydschain/consensus/pos
-consensus/pos/engine.go:23:1: syntax error: non-declaration statement outside function body
+package pos
+
+const (
+	MinValidatorStake = 1_000_000_000 // 10 GYDS
+	UnbondingPeriod   = 10            // in blocks
+	BlockInterval     = 5             // seconds between blocks (demo)
+)
