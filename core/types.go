@@ -37,6 +37,4 @@ type ErrString struct {
 	S string
 }
 
-func (e *ErrString) Error() string {
-	return e.S
-}
+func (e *ErrString) Error() string { return e.S }
