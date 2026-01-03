@@ -2,26 +2,18 @@ package core
 
 type Address string
 
-type Asset struct {
-	ID       string
-	Name     string
-	Symbol   string
-	Decimals uint8
-	Native   bool
-}
-
-type Block struct {
-	Height    uint64
-	Timestamp int64
-	Proposer  Address
-}
-
 type Account struct {
 	Address   Address
 	Nonce     uint64
 	Balance   map[string]uint64
 	Staked    uint64
 	Unbonding uint64
+}
+
+type Block struct {
+	Height    uint64
+	Timestamp int64
+	Proposer  Address
 }
 
 type TxType uint8
@@ -41,7 +33,6 @@ type Transaction struct {
 	Signature []byte
 }
 
-// Simple error wrapper
 type ErrString struct {
 	S string
 }
