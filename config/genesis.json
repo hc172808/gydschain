@@ -1,0 +1,31 @@
+{
+  "chain_id": "gyds-mainnet-1",
+  "genesis_time": "2026-01-03T00:00:00Z",
+  "assets": [
+    {
+      "id": "GYDS",
+      "name": "GYDS Coin",
+      "symbol": "GYDS",
+      "decimals": 8,
+      "native": true
+    },
+    {
+      "id": "GYD",
+      "name": "Guyana Dollar",
+      "symbol": "GYD",
+      "decimals": 2,
+      "native": true
+    }
+  ],
+  "balances": {
+    "GYDS1FOUNDATION": {
+      "GYDS": 100000000000000
+    }
+  },
+  "validators": [
+    {
+      "address": "GYDS1FOUNDATION",
+      "stake": 50000000000000
+    }
+  ]
+}
