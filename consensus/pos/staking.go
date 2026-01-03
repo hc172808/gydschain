@@ -20,7 +20,7 @@ func (e *Engine) ApplyStake(tx core.Transaction, acc *core.Account) error {
 	acc.Balance["GYDS"] -= tx.Amount
 	acc.Staked += tx.Amount
 
-	e.addOrIncreaseValidator(tx.From, tx.Amount)
+	e.addOrIncreaseValidator(string(tx.From), tx.Amount)
 	return nil
 }
 
@@ -32,7 +32,7 @@ func (e *Engine) ApplyUnstake(tx core.Transaction, acc *core.Account) error {
 	acc.Staked -= tx.Amount
 	acc.Unbonding += tx.Amount
 
-	v := e.validator(tx.From)
+	v := e.validator(string(tx.From))
 	if v != nil {
 		v.UnbondingHeight = e.State.Height + UnbondingPeriod
 	}
