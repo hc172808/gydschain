@@ -2,6 +2,12 @@ package pos
 
 import "github.com/hc172808/gydschain/core"
 
+var (
+	ErrStakeTooSmall     = &core.ErrString{"stake amount too small"}
+	ErrInsufficientFunds = &core.ErrString{"insufficient funds"}
+	ErrInsufficientStake = &core.ErrString{"insufficient stake"}
+)
+
 func (e *Engine) ApplyStake(tx core.Transaction, acc *core.Account) error {
 	if tx.Amount < MinValidatorStake {
 		return ErrStakeTooSmall
