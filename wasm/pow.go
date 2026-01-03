@@ -1,7 +1,5 @@
-package wallet
+package wasm
 
-import "github.com/hc172808/gydschain/core"
-
-func GetBalance(addr core.Address) map[string]uint64 {
-    return map[string]uint64{}
+func Mine(seed []byte, difficulty uint32) (uint64, []byte) {
+    return 0, nil
 }
