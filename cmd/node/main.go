@@ -1,34 +1,99 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/hc172808/gydschain/consensus/pos"
 	"github.com/hc172808/gydschain/core"
 	"github.com/hc172808/gydschain/rpc"
-	"github.com/hc172808/gydschain/utils"
 )
 
 func main() {
-	utils.Info("Starting GYDS node")
+	log.Println("[INFO] Starting GYDS node")
 
-	genesis, err := core.LoadGenesis("config/genesis.json")
+	// 1️⃣ Load genesis file
+	genesisPath := "genesis.json"
+	genesis, err := core.LoadGenesis(genesisPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("[ERROR] Failed to load genesis: %v", err)
 	}
 
+	// 2️⃣ Initialize PoS engine from genesis
 	engine := pos.NewEngineFromGenesis(genesis)
 	engine.StartBlockProduction()
 
-	server := rpc.New(":8545")
-	go server.Start()
+	// 3️⃣ Initialize RPC server state
+	server := &rpc.Server{
+		engine: engine,
+		state:  &rpc.State{Accounts: make(map[core.Address]*core.Account)},
+	}
 
-	utils.Info("Node running with PoS consensus")
+	// 4️⃣ Populate accounts from genesis
+	for addr, bal := range genesis.Balances {
+		server.state.Accounts[addr] = &core.Account{
+			Address: addr,
+			Balance: bal,
+		}
+	}
 
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	<-sigCh
+	// 5️⃣ Setup JSON-RPC HTTP endpoints
+	http.HandleFunc("/rpc", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Method string          `json:"method"`
+			Params json.RawMessage `json:"params"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var res interface{}
+		var err error
+
+		switch req.Method {
+		case "account_get":
+			var p struct {
+				Address core.Address `json:"address"`
+			}
+			json.Unmarshal(req.Params, &p)
+			res = server.Account(p.Address)
+
+		case "tx_sendRaw":
+			var tx core.Transaction
+			json.Unmarshal(req.Params, &tx)
+			err = server.SendRawTx(tx)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			res = map[string]string{"status": "ok"}
+
+		case "chain_getInfo":
+			res = map[string]interface{}{
+				"height": engine.State.Height,
+				"validators": func() []string {
+					var out []string
+					for _, v := range engine.State.Validators {
+						out = append(out, v.Address)
+					}
+					return out
+				}(),
+			}
+
+		default:
+			http.Error(w, "unknown method", http.StatusBadRequest)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(res)
+	})
+
+	addr := ":8545"
+	log.Printf("[INFO] Node is running and listening on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
