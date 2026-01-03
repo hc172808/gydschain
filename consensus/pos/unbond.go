@@ -2,7 +2,6 @@ package pos
 
 import "github.com/hc172808/gydschain/core"
 
-// FinalizeUnbonding releases funds after unbonding period
 func (e *Engine) FinalizeUnbonding(accounts map[string]*core.Account) {
 	for _, v := range e.State.Validators {
 		if v.UnbondingHeight > 0 && e.State.Height >= v.UnbondingHeight {
