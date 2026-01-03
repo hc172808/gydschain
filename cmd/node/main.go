@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/hc172808/gydschain/consensus/pos"
 	"github.com/hc172808/gydschain/rpc"
@@ -14,7 +17,7 @@ func main() {
 	// Initialize PoS engine
 	_ = pos.NewEngine()
 
-	// Start RPC server
+	// Start RPC server (non-blocking)
 	server := rpc.New(":8545")
 	go func() {
 		if err := server.Start(); err != nil {
@@ -24,6 +27,10 @@ func main() {
 
 	utils.Info("Node is running and listening")
 
-	// 🔒 BLOCK FOREVER (node stays alive)
-	select {}
+	// ✅ Proper blocking with OS signals
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+	<-sigCh
+	utils.Info("Shutting down node")
 }
