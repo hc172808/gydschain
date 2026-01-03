@@ -28,4 +28,5 @@ func (e *Engine) produceBlock() {
 	}
 
 	e.State.Height++
+	_ = block
 }
