@@ -7,11 +7,11 @@ import (
 )
 
 type Genesis struct {
-	ChainID     string             `json:"chain_id"`
-	GenesisTime time.Time          `json:"genesis_time"`
-	Assets      []Asset            `json:"assets"`
-	Balances    map[Address]map[string]uint64 `json:"balances"`
-	Validators  []GenesisValidator `json:"validators"`
+	ChainID     string                         `json:"chain_id"`
+	GenesisTime time.Time                      `json:"genesis_time"`
+	Assets      []Asset                        `json:"assets"`
+	Balances    map[Address]map[string]uint64  `json:"balances"`
+	Validators  []GenesisValidator             `json:"validators"`
 }
 
 type GenesisValidator struct {
