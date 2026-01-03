@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/hc172808/gydschain/consensus/pos"
+	"github.com/hc172808/gydschain/core"
 	"github.com/hc172808/gydschain/rpc"
 	"github.com/hc172808/gydschain/utils"
 )
@@ -14,23 +15,20 @@ import (
 func main() {
 	utils.Info("Starting GYDS node")
 
-	// Initialize PoS engine
-	_ = pos.NewEngine()
+	genesis, err := core.LoadGenesis("config/genesis.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// Start RPC server (non-blocking)
+	engine := pos.NewEngineFromGenesis(genesis)
+	engine.StartBlockProduction()
+
 	server := rpc.New(":8545")
-	go func() {
-		if err := server.Start(); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	go server.Start()
 
-	utils.Info("Node is running and listening")
+	utils.Info("Node running with PoS consensus")
 
-	// ✅ Proper blocking with OS signals
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-
 	<-sigCh
-	utils.Info("Shutting down node")
 }
