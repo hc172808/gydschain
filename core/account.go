@@ -1,9 +1,10 @@
 package core
 
-type Address string
-
 type Account struct {
-    Address  Address
-    Nonce    uint64
-    Balances map[string]uint64
+	Address Address
+	Nonce   uint64
+	Balance map[string]uint64
+
+	Staked    uint64
+	Unbonding uint64
 }
