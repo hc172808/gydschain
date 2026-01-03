@@ -14,7 +14,6 @@ func NewEngine() *Engine {
 
 func NewEngineFromGenesis(g *core.Genesis) *Engine {
 	state := NewState()
-
 	for _, v := range g.Validators {
 		state.Validators = append(state.Validators, &Validator{
 			Address: v.Address,
@@ -22,7 +21,6 @@ func NewEngineFromGenesis(g *core.Genesis) *Engine {
 			Power:   v.Stake,
 		})
 	}
-
 	return &Engine{State: state}
 }
 
