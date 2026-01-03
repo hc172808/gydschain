@@ -1,11 +1,23 @@
 package pos
 
+import "github.com/hc172808/gydschain/core"
+
 type Engine struct {
-    Validators map[string]*Validator
+	State *State
 }
 
-func NewEngine() *Engine {
-    return &Engine{
-        Validators: make(map[string]*Validator),
-    }
+func NewEngineFromGenesis(g *core.Genesis) *Engine {
+	state := NewState()
+
+	for _, v := range g.Validators {
+		state.Validators = append(state.Validators, &Validator{
+			Address: v.Address,
+			Stake:   v.Stake,
+			Power:   v.Stake,
+		})
+	}
+
+	return &Engine{State: state}
+}
+
 }
